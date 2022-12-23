@@ -9,7 +9,7 @@ import (
 
 // Segmenter is used for loading strings in segment
 type Segmenter[T comparable] struct {
-	items         []T
+	collection    []T
 	startIdx      int
 	endIdx        int
 	segmentLength int
@@ -19,7 +19,7 @@ type Segmenter[T comparable] struct {
 
 // Config holds configuration for Segmenter
 type Config[T comparable] struct {
-	Items         []T `validate:"min=1"`
+	Collection    []T `validate:"min=1"`
 	SegmentLength int `validate:"min=1"`
 }
 
@@ -32,15 +32,15 @@ func New[T comparable](cfg Config[T]) (*Segmenter[T], error) {
 	}
 	// construct segmenter
 	segmenter := &Segmenter[T]{
-		items:         cfg.Items,
+		collection:    cfg.Collection,
 		segmentLength: cfg.SegmentLength,
 		startIdx:      0,
 		endIdx:        cfg.SegmentLength,
-		numOps:        int(math.Ceil(float64(len(cfg.Items)) / float64(cfg.SegmentLength))),
+		numOps:        int(math.Ceil(float64(len(cfg.Collection)) / float64(cfg.SegmentLength))),
 		opsCounter:    0,
 	}
-	if segmenter.endIdx > len(cfg.Items) {
-		segmenter.endIdx = len(cfg.Items)
+	if segmenter.endIdx > len(cfg.Collection) {
+		segmenter.endIdx = len(cfg.Collection)
 	}
 	return segmenter, nil
 }
@@ -54,11 +54,11 @@ func (s *Segmenter[T]) Next() []T {
 		s.opsCounter++
 		s.startIdx = s.opsCounter * s.segmentLength
 		s.endIdx = s.startIdx + s.segmentLength
-		if s.endIdx > len(s.items) {
-			s.endIdx = len(s.items)
+		if s.endIdx > len(s.collection) {
+			s.endIdx = len(s.collection)
 		}
 	}()
-	return s.items[s.startIdx:s.endIdx]
+	return s.collection[s.startIdx:s.endIdx]
 }
 
 // HasNext returns true when Segmenter still has next segment

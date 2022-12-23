@@ -16,7 +16,7 @@ func TestNew(t *testing.T) {
 		{
 			Name: "Valid Config",
 			Config: segmenter.Config[string]{
-				Items:         []string{"1", "2", "3"},
+				Collection:    []string{"1", "2", "3"},
 				SegmentLength: 5,
 			},
 			ExpHasError: false,
@@ -24,7 +24,7 @@ func TestNew(t *testing.T) {
 		{
 			Name: "Empty Items",
 			Config: segmenter.Config[string]{
-				Items:         nil,
+				Collection:    nil,
 				SegmentLength: 10,
 			},
 			ExpHasError: true,
@@ -32,14 +32,14 @@ func TestNew(t *testing.T) {
 		{
 			Name: "No Segment Length",
 			Config: segmenter.Config[string]{
-				Items: []string{"1", "2", "3"},
+				Collection: []string{"1", "2", "3"},
 			},
 			ExpHasError: true,
 		},
 		{
 			Name: "Negative Segment Length",
 			Config: segmenter.Config[string]{
-				Items:         []string{"1", "2", "3"},
+				Collection:    []string{"1", "2", "3"},
 				SegmentLength: -5,
 			},
 			ExpHasError: true,
@@ -93,7 +93,7 @@ func TestNext(t *testing.T) {
 		t.Run(testCase.Name, func(t *testing.T) {
 			// initialize segmenter
 			sgmntr, err := segmenter.New(segmenter.Config[string]{
-				Items:         testCase.Items,
+				Collection:    testCase.Items,
 				SegmentLength: testCase.SegmentLength,
 			})
 			require.NoError(t, err)
