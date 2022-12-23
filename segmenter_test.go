@@ -7,6 +7,52 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestNew(t *testing.T) {
+	testCases := []struct {
+		Name        string
+		Config      segmenter.Config[string]
+		ExpHasError bool
+	}{
+		{
+			Name: "Valid Config",
+			Config: segmenter.Config[string]{
+				Items:         []string{"1", "2", "3"},
+				SegmentLength: 5,
+			},
+			ExpHasError: false,
+		},
+		{
+			Name: "Empty Items",
+			Config: segmenter.Config[string]{
+				Items:         nil,
+				SegmentLength: 10,
+			},
+			ExpHasError: true,
+		},
+		{
+			Name: "No Segment Length",
+			Config: segmenter.Config[string]{
+				Items: []string{"1", "2", "3"},
+			},
+			ExpHasError: true,
+		},
+		{
+			Name: "Negative Segment Length",
+			Config: segmenter.Config[string]{
+				Items:         []string{"1", "2", "3"},
+				SegmentLength: -5,
+			},
+			ExpHasError: true,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.Name, func(t *testing.T) {
+			_, err := segmenter.New(testCase.Config)
+			require.Equal(t, testCase.ExpHasError, err != nil)
+		})
+	}
+}
+
 func TestNext(t *testing.T) {
 	testCases := []struct {
 		Name          string
