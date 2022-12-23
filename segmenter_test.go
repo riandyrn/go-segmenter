@@ -16,7 +16,7 @@ func TestNew(t *testing.T) {
 		{
 			Name: "Valid Config",
 			Config: segmenter.Config[string]{
-				Collection:    []string{"1", "2", "3"},
+				Slice:         []string{"1", "2", "3"},
 				SegmentLength: 5,
 			},
 			ExpHasError: false,
@@ -24,7 +24,7 @@ func TestNew(t *testing.T) {
 		{
 			Name: "Empty Items",
 			Config: segmenter.Config[string]{
-				Collection:    nil,
+				Slice:         nil,
 				SegmentLength: 10,
 			},
 			ExpHasError: true,
@@ -32,14 +32,14 @@ func TestNew(t *testing.T) {
 		{
 			Name: "No Segment Length",
 			Config: segmenter.Config[string]{
-				Collection: []string{"1", "2", "3"},
+				Slice: []string{"1", "2", "3"},
 			},
 			ExpHasError: true,
 		},
 		{
 			Name: "Negative Segment Length",
 			Config: segmenter.Config[string]{
-				Collection:    []string{"1", "2", "3"},
+				Slice:         []string{"1", "2", "3"},
 				SegmentLength: -5,
 			},
 			ExpHasError: true,
@@ -56,13 +56,13 @@ func TestNew(t *testing.T) {
 func TestNext(t *testing.T) {
 	testCases := []struct {
 		Name          string
-		Items         []string
+		Slice         []string
 		SegmentLength int
 		ExpResults    [][]string
 	}{
 		{
 			Name:          "Segment Length Evenly Divisible With List Length",
-			Items:         []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+			Slice:         []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
 			SegmentLength: 5,
 			ExpResults: [][]string{
 				{"0", "1", "2", "3", "4"},
@@ -71,7 +71,7 @@ func TestNext(t *testing.T) {
 		},
 		{
 			Name:          "Segment Length Not Evenly Divisible With List Length",
-			Items:         []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+			Slice:         []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
 			SegmentLength: 3,
 			ExpResults: [][]string{
 				{"0", "1", "2"},
@@ -82,7 +82,7 @@ func TestNext(t *testing.T) {
 		},
 		{
 			Name:          "Segment Length Larger Than List Length",
-			Items:         []string{"0", "1", "2", "3"},
+			Slice:         []string{"0", "1", "2", "3"},
 			SegmentLength: 5,
 			ExpResults: [][]string{
 				{"0", "1", "2", "3"},
@@ -93,7 +93,7 @@ func TestNext(t *testing.T) {
 		t.Run(testCase.Name, func(t *testing.T) {
 			// initialize segmenter
 			sgmntr, err := segmenter.New(segmenter.Config[string]{
-				Collection:    testCase.Items,
+				Slice:         testCase.Slice,
 				SegmentLength: testCase.SegmentLength,
 			})
 			require.NoError(t, err)
