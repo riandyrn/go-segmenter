@@ -17,7 +17,7 @@ type Segmenter[T comparable] struct {
 	opsCounter    int
 }
 
-// Config holds configs for Segmenter
+// Config holds configuration for Segmenter
 type Config[T comparable] struct {
 	Items         []T `validate:"min=1"`
 	SegmentLength int `validate:"min=1"`
@@ -45,8 +45,7 @@ func New[T comparable](cfg Config[T]) (*Segmenter[T], error) {
 	return segmenter, nil
 }
 
-// Next returns next strings segment, when there is no next
-// segment the returned value is nil
+// Next returns next segment. In case there is no longer next segment, it returns nil
 func (s *Segmenter[T]) Next() []T {
 	if s.opsCounter == s.numOps {
 		return nil
@@ -62,7 +61,7 @@ func (s *Segmenter[T]) Next() []T {
 	return s.items[s.startIdx:s.endIdx]
 }
 
-// HasNext returns true when strings still has next segment
+// HasNext returns true when Segmenter still has next segment
 func (s *Segmenter[_]) HasNext() bool {
 	return s.opsCounter < s.numOps
 }
