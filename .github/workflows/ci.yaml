@@ -1,0 +1,28 @@
+name: ci
+on:
+  push:
+    paths-ignore:
+      - "**.md"
+      - LICENCE
+    branches:
+      - master
+  pull_request:
+    paths-ignore:
+      - "**.md"
+      - LICENCE
+env:
+  DEFAULT_GO_VERSION: 1.18
+jobs:
+  test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v3.5.0
+        with:
+          go-version: ${{ env.DEFAULT_GO_VERSION }}
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+      - name: Run test
+        run: make test
+      - name: Build
+        run: make build

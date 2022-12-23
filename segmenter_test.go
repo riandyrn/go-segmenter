@@ -1,85 +1,109 @@
 package segmenter_test
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/riandyrn/go-segmenter"
+	"github.com/stretchr/testify/require"
 )
 
-// We are testing this using list of strings, since I think it is the
-// simplest one to test
-func TestNext(t *testing.T) {
+func TestNew(t *testing.T) {
 	testCases := []struct {
-		Name          string
-		Collections   []interface{}
-		SegmentLength int
-		ExpResults    [][]interface{}
+		Name        string
+		Config      segmenter.Config[string]
+		ExpHasError bool
 	}{
 		{
-			Name:          "Segment Length Evenly Divisible With List Length",
-			Collections:   []interface{}{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
-			SegmentLength: 5,
-			ExpResults: [][]interface{}{
-				[]interface{}{"0", "1", "2", "3", "4"},
-				[]interface{}{"5", "6", "7", "8", "9"},
+			Name: "Valid Config",
+			Config: segmenter.Config[string]{
+				Slice:         []string{"1", "2", "3"},
+				SegmentLength: 5,
 			},
+			ExpHasError: false,
 		},
 		{
-			Name:          "Segment Length Not Evenly Divisible With List Length",
-			Collections:   []interface{}{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
-			SegmentLength: 3,
-			ExpResults: [][]interface{}{
-				[]interface{}{"0", "1", "2"},
-				[]interface{}{"3", "4", "5"},
-				[]interface{}{"6", "7", "8"},
-				[]interface{}{"9"},
+			Name: "Empty Items",
+			Config: segmenter.Config[string]{
+				Slice:         nil,
+				SegmentLength: 10,
 			},
+			ExpHasError: true,
 		},
 		{
-			Name:          "Segment Length Larger Than List Length",
-			Collections:   []interface{}{"0", "1", "2", "3"},
-			SegmentLength: 5,
-			ExpResults: [][]interface{}{
-				[]interface{}{"0", "1", "2", "3"},
+			Name: "No Segment Length",
+			Config: segmenter.Config[string]{
+				Slice: []string{"1", "2", "3"},
 			},
+			ExpHasError: true,
 		},
 		{
-			Name:          "Zero Segment Length",
-			Collections:   []interface{}{"0", "1", "2", "3"},
-			SegmentLength: 0,
-			ExpResults:    nil,
+			Name: "Negative Segment Length",
+			Config: segmenter.Config[string]{
+				Slice:         []string{"1", "2", "3"},
+				SegmentLength: -5,
+			},
+			ExpHasError: true,
 		},
 	}
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
-			sgmntr := segmenter.NewSegmenter(segmenter.Configs{
-				Collections:   testCase.Collections,
-				SegmentLength: testCase.SegmentLength,
-			})
-			var results [][]interface{}
-			for sgmntr.HasNext() {
-				results = append(results, sgmntr.Next())
-			}
-			if len(results) != len(testCase.ExpResults) {
-				t.Fatalf("unexpected results, expected: %v, got: %v", testCase.ExpResults, results)
-			}
-			for i := 0; i < len(results); i++ {
-				resultStr := strings.Join(toStrings(results[i]), ",")
-				expResultStr := strings.Join(toStrings(testCase.ExpResults[i]), ",")
-				if resultStr != expResultStr {
-					t.Fatalf("unexpected result, expected: %v, got: %v", expResultStr, resultStr)
-				}
-			}
+			_, err := segmenter.New(testCase.Config)
+			require.Equal(t, testCase.ExpHasError, err != nil)
 		})
 	}
 }
 
-func toStrings(collections []interface{}) []string {
-	result := []string{}
-	for _, e := range collections {
-		v := e.(string)
-		result = append(result, v)
+func TestNext(t *testing.T) {
+	testCases := []struct {
+		Name          string
+		Slice         []string
+		SegmentLength int
+		ExpResults    [][]string
+	}{
+		{
+			Name:          "Segment Length Evenly Divisible With List Length",
+			Slice:         []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+			SegmentLength: 5,
+			ExpResults: [][]string{
+				{"0", "1", "2", "3", "4"},
+				{"5", "6", "7", "8", "9"},
+			},
+		},
+		{
+			Name:          "Segment Length Not Evenly Divisible With List Length",
+			Slice:         []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+			SegmentLength: 3,
+			ExpResults: [][]string{
+				{"0", "1", "2"},
+				{"3", "4", "5"},
+				{"6", "7", "8"},
+				{"9"},
+			},
+		},
+		{
+			Name:          "Segment Length Larger Than List Length",
+			Slice:         []string{"0", "1", "2", "3"},
+			SegmentLength: 5,
+			ExpResults: [][]string{
+				{"0", "1", "2", "3"},
+			},
+		},
 	}
-	return result
+	for _, testCase := range testCases {
+		t.Run(testCase.Name, func(t *testing.T) {
+			// initialize segmenter
+			sgmntr, err := segmenter.New(segmenter.Config[string]{
+				Slice:         testCase.Slice,
+				SegmentLength: testCase.SegmentLength,
+			})
+			require.NoError(t, err)
+			// collect all results
+			var results [][]string
+			for sgmntr.HasNext() {
+				results = append(results, sgmntr.Next())
+			}
+			// compare collected results
+			require.Equal(t, testCase.ExpResults, results)
+		})
+	}
 }
